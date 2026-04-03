@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Finance Tracker</title>
+</head>
+<body>
+    <h1>Finance Tracker</h1>
+
+    <form id="expenseForm">
+        Description: <input type="text" id="description" required><br>
+        Category: <input type="text" id="category" required><br>
+        Amount: <input type="number" id="amount" step="0.01" required><br>
+        <button type="submit">Add Expense</button>
+    </form>
+
+    <h2>Expenses</h2>
+    <ul id="expenseList"></ul>
+
+    <script>
+        async function fetchExpenses() {
+            const res = await fetch('/expenses');
+            const data = await res.json();
+            const list = document.getElementById('expenseList');
+            list.innerHTML = '';
+            data.forEach(e => {
+                const li = document.createElement('li');
+                li.textContent = `${e.date} | ${e.category} | ${e.description} | $${e.amount}`;
+                list.appendChild(li);
+            });
+        }
+
+        document.getElementById('expenseForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const desc = document.getElementById('description').value;
+            const cat = document.getElementById('category').value;
+            const amount = parseFloat(document.getElementById('amount').value);
+            await fetch('/add', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({description: desc, category: cat, amount})
+            });
+            document.getElementById('description').value = '';
+            document.getElementById('category').value = '';
+            document.getElementById('amount').value = '';
+            fetchExpenses();
+        });
+
+        fetchExpenses();
+    </script>
+</body>
+</html>
